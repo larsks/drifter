@@ -13,7 +13,11 @@ from drifter import Drifter
 
 from commands.command_up import CommandUp
 from commands.command_down import CommandDown
+from commands.command_status import CommandStatus
+from commands.command_sgup import CommandSgup
+from commands.command_sgdown import CommandSgdown
 from commands.command_hosts import CommandHosts
+from commands.command_ansible_hosts import CommandAnsibleHosts
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -29,6 +33,10 @@ def parse_args():
     CommandUp(subparsers)
     CommandDown(subparsers)
     CommandHosts(subparsers)
+    CommandAnsibleHosts(subparsers)
+    CommandStatus(subparsers)
+    CommandSgup(subparsers)
+    CommandSgdown(subparsers)
 
     return p.parse_args()
 

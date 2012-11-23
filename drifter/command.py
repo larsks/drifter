@@ -3,7 +3,6 @@
 import os
 import sys
 import logging
-import argparse
 
 class Command (object):
     def __init__ (self, parser):

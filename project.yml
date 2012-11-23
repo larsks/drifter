@@ -4,16 +4,16 @@ project:
   security groups:
     default:
       - protocol: tcp
-        from_port: 22
+        from port: 22
       - protocol: icmp
     web:
       - protocol: tcp
-        from_port: 80
+        from port: 80
       - protocol: tcp
-        from_port: 443
+        from port: 443
       - protocol: tcp
-        from_port: 8000
-        to_port: 9000
+        from port: 8000
+        to port: 9000
 
   instances:
     default:

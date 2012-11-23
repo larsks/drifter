@@ -89,7 +89,9 @@ class Drifter (object):
     def create_security_group_rules(self, group, rules):
         self.log.info('adding rules to security group %s', group.name)
         for rule in rules:
+            self.log.debug('adding rule (pre) %s', rule)
             rule = Rule(rule)
+            self.log.debug('adding rule (post) %s', rule)
 
             try:
                 sr = self.client.security_group_rules.create(
