@@ -18,5 +18,5 @@ class CommandAnsibleHosts (Command):
 
         print json.dumps({
                 api.config['project_name']: systems
-                })
+                }, indent=True)
 

@@ -14,6 +14,9 @@ class Instance (dict):
         self.parent = parent
         self.project = project
         self.log = logging.getLogger('drifter.instance.%s' % self['name'])
+        
+        self.cache = self.project.cachemgr.get_cache(
+                'instance/%s' % self['name'], expire=300)
 
     def __getitem__ (self, k):
         try:
@@ -71,6 +74,7 @@ class Instance (dict):
 
     def delete(self):
         self.log.info('deleting')
+        self.cache.clear()
 
         try:
             self.server.delete()
@@ -100,8 +104,10 @@ class Instance (dict):
 
     @property
     def ip(self):
-        for fip in  self.project.client.floating_ips.list():
-            if fip.instance_id == self.server.id:
-                return fip.ip
+        def get_ip():
+            for fip in  self.project.client.floating_ips.list():
+                if fip.instance_id == self.server.id:
+                    return fip.ip
 
+        return self.cache.get(key='ip', createfunc=get_ip)
 

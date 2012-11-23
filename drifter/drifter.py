@@ -9,6 +9,8 @@ import time
 import jinja2
 import yaml
 
+from beaker.cache import CacheManager
+from beaker.util import parse_cache_config_options
 import novaclient.v1_1.client
 
 from instance import Instance
@@ -16,6 +18,12 @@ from secgroups import Rule
 
 DEFAULT_USER_CONFIG = os.path.join(os.environ['HOME'], '.drifter.yml')
 DEFAULT_PROJECT_CONFIG = 'project.yml'
+
+cache_opts = {
+    'cache.type': 'file',
+    'cache.data_dir': '.drifter/cache/data',
+    'cache.lock_dir': '.drifter/cache/lock'
+}
 
 class Drifter (object):
     def __init__ (self,
@@ -30,12 +38,16 @@ class Drifter (object):
                 else DEFAULT_PROJECT_CONFIG
 
         self.setup_logging()
+        self.setup_cache()
         self.load_user_config()
         self.load_project_config()
         self.create_client()
 
     def setup_logging(self):
         self.log = logging.getLogger('drifter')
+
+    def setup_cache(self):
+        self.cachemgr = CacheManager(**parse_cache_config_options(cache_opts))
 
     def qualify(self, name):
         return '%s.%s.%s' % (
