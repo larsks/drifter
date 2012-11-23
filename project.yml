@@ -1,0 +1,32 @@
+project:
+  project_name: cluster
+
+  security groups:
+    default:
+      - protocol: tcp
+        from_port: 22
+      - protocol: icmp
+    web:
+      - protocol: tcp
+        from_port: 80
+      - protocol: tcp
+        from_port: 443
+      - protocol: tcp
+        from_port: 8000
+        to_port: 9000
+
+  instances:
+    default:
+      image: ubuntu-precise-x86_64
+      flavor: m1.small
+      security_groups:
+        - default
+    master:
+      userdata: userdata/master
+      security_groups:
+        - default
+        - web
+    {% for node in range(0,3) %}
+    node-{{node}}:
+    {% endfor %}
+
