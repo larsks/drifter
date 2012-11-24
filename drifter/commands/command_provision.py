@@ -21,6 +21,7 @@ class CommandProvision (Command):
         p.add_argument('--sudo', '-s', action='store_true')
         p.add_argument('--remote-user', '-u')
         p.add_argument('--extra-vars', '-e')
+        p.add_argument('playbook', default='playbook.yml', nargs='?')
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
@@ -29,8 +30,8 @@ class CommandProvision (Command):
                     'continue anyay)')
             sys.exit(1)
 
-        if not os.path.exists('playbook.yml'):
-            self.log.error('your project does not have a playbook')
+        if not os.path.exists(opts.playbook):
+            self.log.error('missing playbook %s', opts.playbook)
             sys.exit(1)
 
         with open('.ansible_hosts', 'w') as fd:
@@ -49,13 +50,13 @@ class CommandProvision (Command):
             playbook_args.append('-e')
             playbook_args.append(opts.extra_vars)
 
-        print 'Calling ansible-playbook with playbook.yml'
+        print 'Calling ansible-playbook with %s' % opts.playbook
         subprocess.call(
                 [
                     'ansible-playbook',
                     '-i', '.ansible_hosts',
                     ]
                 + playbook_args
-                + ['playbook.yml']
+                + [opts.playbook]
                 )
 
