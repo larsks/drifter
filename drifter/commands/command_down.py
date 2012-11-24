@@ -7,7 +7,8 @@ from ..command import Command
 
 class CommandDown (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('down')
+        p = self.parser.add_parser('down',
+                help='Shut down all instances.')
         p.add_argument('server', nargs='?')
         p.set_defaults(handler=self.run)
 

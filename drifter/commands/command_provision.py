@@ -15,7 +15,8 @@ def find_binary(name):
 
 class CommandProvision (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('provision')
+        p = self.parser.add_parser('provision',
+                help='Run ansible-playbook against playbook.yml')
         p.add_argument('--verbose', '-v', action='store_true')
         p.add_argument('--sudo', '-s', action='store_true')
         p.add_argument('--remote-user', '-u')

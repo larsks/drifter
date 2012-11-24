@@ -7,7 +7,8 @@ from ..command import Command
 
 class CommandHosts (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('hosts')
+        p = self.parser.add_parser('hosts',
+                help='Output a list of hosts in /etc/hosts format.')
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):

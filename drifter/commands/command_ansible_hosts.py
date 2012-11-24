@@ -14,7 +14,8 @@ def gen_ansible_hosts(api, out):
 
 class CommandAnsibleHosts (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('ansible_hosts')
+        p = self.parser.add_parser('ansible_hosts',
+                help='Generate output suitable for use as an Ansible inventory.')
         p.add_argument('--host')
         p.add_argument('--list', action='store_true')
         p.set_defaults(handler=self.run)

@@ -7,7 +7,8 @@ from ..command import Command
 
 class CommandUp (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('up')
+        p = self.parser.add_parser('up',
+                help='Start all instances.')
         p.add_argument('server', nargs='?')
         p.set_defaults(handler=self.run)
 

@@ -7,7 +7,8 @@ from ..command import Command
 
 class CommandStatus (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('status')
+        p = self.parser.add_parser('status',
+                help='Show status of all instances.')
         p.add_argument('server', nargs='?')
         p.set_defaults(handler=self.run)
 

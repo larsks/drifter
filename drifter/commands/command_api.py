@@ -24,7 +24,8 @@ Drifter object available as "api".
 
 class CommandApi (Command):
     def build_subparser(self):
-        p = self.parser.add_parser('api')
+        p = self.parser.add_parser('api',
+                help='Start an interactive Python shell with access to the Drifter API.')
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
