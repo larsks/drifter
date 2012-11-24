@@ -12,5 +12,6 @@ class CommandSgup (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        print 'Creating all security groups.'
         api.create_security_groups()
 

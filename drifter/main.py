@@ -25,6 +25,7 @@ def parse_args(args):
             action='store_true')
     p.add_argument('--debug',
             action='store_true')
+    p.add_argument('--force', '-F', action='store_true')
 
     subparsers = p.add_subparsers(title='Available commands')
 

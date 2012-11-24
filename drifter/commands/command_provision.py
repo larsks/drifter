@@ -24,6 +24,11 @@ class CommandProvision (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        if not api.all_up() and not opts.force:
+            self.log.error('some instances are not up (use --force to ' \
+                    'continue anyay)')
+            sys.exit(1)
+
         if not os.path.exists('playbook.yml'):
             self.log.error('your project does not have a playbook')
             sys.exit(1)
@@ -44,7 +49,7 @@ class CommandProvision (Command):
             playbook_args.append('-e')
             playbook_args.append(opts.extra_vars)
 
-        self.log.info('calling ansible-playbook')
+        print 'Calling ansible-playbook with playbook.yml'
         subprocess.call(
                 [
                     'ansible-playbook',

@@ -13,7 +13,10 @@ class CommandUp (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        print 'Creating all security groups.'
         api.create_security_groups()
+        print 'Creating all instances.'
         api.create_instances()
+        print 'Waiting for instances to become active.'
         api.wait_for_up()
 

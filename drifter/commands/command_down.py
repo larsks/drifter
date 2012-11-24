@@ -13,7 +13,9 @@ class CommandDown (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        print 'Deleting all instances.'
         api.delete_instances()
+        print 'Waiting for instances to stop.'
         api.wait_for_down()
         api.delete_security_groups()
 

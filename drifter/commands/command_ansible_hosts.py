@@ -4,13 +4,18 @@ import os
 import sys
 import json
 
+import novaclient.exceptions
+
 from ..command import Command
 
 def gen_ansible_hosts(api, out):
     for i in api.instances():
-        print >>out, '%s ansible_ssh_host=%s' % (
-                i['name'], i.ip
-                )
+        try:
+            print >>out, '%s ansible_ssh_host=%s' % (
+                    i['name'], i.ip
+                    )
+        except novaclient.exceptions.NotFound:
+            continue
 
 class CommandAnsibleHosts (Command):
     def build_subparser(self):
@@ -21,5 +26,10 @@ class CommandAnsibleHosts (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
-        self.gen_ansible_hosts(api, sys.stdout)
+        if not api.all_up() and not opts.force:
+            self.log.error('some instances are not up (use --force to ' \
+                    'continue anyay)')
+            sys.exit(1)
+
+        gen_ansible_hosts(api, sys.stdout)
 

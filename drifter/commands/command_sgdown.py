@@ -12,5 +12,6 @@ class CommandSgdown (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        print 'Deleting all security groups.'
         api.delete_security_groups()
 
