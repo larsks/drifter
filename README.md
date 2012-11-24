@@ -49,8 +49,8 @@ Available commands
 License
 =======
 
-| Drifter -- a cloud provisioning tool
-| Copyright (C) 2012 Lars Kellogg-Stedman <lars@oddbit.com>
+Drifter -- a cloud provisioning tool  
+Copyright (C) 2012 Lars Kellogg-Stedman <lars@oddbit.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
