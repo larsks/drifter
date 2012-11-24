@@ -44,12 +44,15 @@ class Drifter (object):
         self.create_client()
 
     def setup_logging(self):
+        '''Create a logger for this Drifter instance.'''
         self.log = logging.getLogger('drifter')
 
     def setup_cache(self):
+        '''Set up a beaker cache manager.'''
         self.cachemgr = CacheManager(**parse_cache_config_options(cache_opts))
 
     def qualify(self, name):
+        '''Return <os_username>.<project_name>.<name> given <name>.'''
         return '%s.%s.%s' % (
                 self.config['os_username'],
                 self.config['project_name'],
@@ -57,6 +60,9 @@ class Drifter (object):
                 )
 
     def instances(self):
+        '''This is a generate that yields drifter.instance.Instance objects
+        for each instance in your drifter configuration.'''
+
         defaults = self.config['instances'].get('default', {})
         for name, config in self.config['instances'].items():
             if name == 'default':
@@ -67,6 +73,9 @@ class Drifter (object):
             yield Instance(self, name, config, defaults)
 
     def create_client(self):
+        '''Creates a novaclient.v1_1.client.Client for this
+        Drifter instance.'''
+
         self.client = novaclient.v1_1.client.Client(
                 self.config['os_username'],
                 self.config['os_password'],
@@ -75,6 +84,12 @@ class Drifter (object):
                 service_type="compute")
 
     def load_config(self, path):
+        '''Load a YAML configuration file.  The file is first parsed
+        by the Jinja2 templat engine and then passed to the YAML
+        parser.
+        
+        Returns the result of yaml.load()'''
+
         self.log.info('loading configuration from %s', path)
         with open(path) as fd:
             tmpl = jinja2.Template(fd.read())
@@ -82,12 +97,22 @@ class Drifter (object):
         return yaml.load(tmpl.render())
 
     def load_user_config(self):
+        '''Load configuration from user_config_file (generally
+        ~/.drifter.yml).'''
+
         self.config = self.load_config(self.user_config_file)['drifter']
 
     def load_project_config(self):
+        '''Load configuration from project_config_file (generally
+        ./project.yml).'''
+
         self.config.update(self.load_config(self.project_config_file)['project'])
 
     def create_security_group(self, name):
+        '''Given <name>, either create and return a new security group
+        named <name> or return the existing security group with the same
+        name.'''
+
         self.log.info('creating security group %s', self.qualify(name))
         try:
             group = self.client.security_groups.find(name=self.qualify(name))
@@ -99,6 +124,8 @@ class Drifter (object):
         return group
 
     def create_security_group_rules(self, group, rules):
+        '''Provision security group <group> with rules from <rules>'''
+
         self.log.info('adding rules to security group %s', group.name)
         for rule in rules:
             self.log.debug('adding rule (pre) %s', rule)
@@ -116,11 +143,16 @@ class Drifter (object):
                 pass
 
     def create_security_groups(self):
+        '''Create and provision all security groups defined in the
+        configuration.'''
+
         for name, rules in self.config['security groups'].items():
             group = self.create_security_group(name)
             self.create_security_group_rules(group, rules)
 
     def delete_security_group(self, name):
+        '''Delete the named security group.  If it does not exist, ignore
+        the error.'''
         self.log.info('deleting security group %s', self.qualify(name))
         try:
             group = self.client.security_groups.find(name=self.qualify(name))
@@ -129,14 +161,17 @@ class Drifter (object):
             pass
 
     def delete_security_groups(self):
+        '''Delete all security groups defined in the configuration.'''
         for name, rules in self.config['security groups'].items():
             self.delete_security_group(name)
 
     def create_instance(self, instance):
+        '''Create an instance and assign an ip address.'''
         instance.create()
         instance.assign_ip()
 
     def create_instances(self):
+        '''Create all instances defined in the configuration.'''
         defaults = self.config['instances'].get('default', {})
 
         for instance in self.instances():
@@ -144,33 +179,41 @@ class Drifter (object):
                 self.create_instance(instance)
 
     def delete_instance(self, instance):
+        '''Delete a single instance.'''
         instance.delete()
 
     def delete_instances(self):
+        '''Delete all instances defined in the configuration.'''
         defaults = self.config['instances'].get('default', {})
 
         for instance in self.instances():
             self.delete_instance(instance)
 
     def all_up(self):
+        '''Return True if all instances are active.'''
         return all(i.status == 'active' for i in self.instances())
 
     def all_down(self):
+        '''Return True if all instances are down.'''
         return all(i.status == 'down' for i in self.instances())
 
     def wait_for_up(self):
+        '''Wait for all instances to become active.'''
         self.log.info('waiting for instances to start')
         while not self.all_up():
             time.sleep(1)
         self.log.info('instances are started')
 
     def wait_for_down(self):
+        '''Wait for all instances to become down.'''
         self.log.info('waiting for instances to stop')
         while not self.all_down():
             time.sleep(1)
         self.log.info('instances are down')
 
     def check(self):
+        '''Return a (name, status) tuple for all instances defined
+        in the configuration.'''
         return [(x['name'], x.status) for x in self.instances()]
 
 if __name__ == '__main__':
