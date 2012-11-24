@@ -32,9 +32,11 @@ class Instance (dict):
 
     def assign_ip(self):
         # Wait until a fixed address is available.
+        self.log.info('waiting for a fixed ip address')
         while not self.server.networks:
             time.sleep(0.5)
 
+        self.log.info('assigning floating ip address')
         available = [
                 ip for ip in self.project.client.floating_ips.list()
                 if ip.instance_id is None ]
@@ -50,6 +52,7 @@ class Instance (dict):
 
     def create(self):
         self.log.info('creating')
+        self.cache.clear()
 
         image = self.project.client.images.find(name=self['image'])
         flavor = self.project.client.flavors.find(name=self['flavor'])
