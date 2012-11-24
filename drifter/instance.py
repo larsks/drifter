@@ -82,9 +82,17 @@ class Instance (dict):
             pass
 
     @property
+    def id(self):
+        def get_id():
+            srvr = self.project.client.servers.find(
+                    name=self.project.qualify(self['name']))
+            return srvr.id
+
+        return self.cache.get(key='id', createfunc=get_id)
+
+    @property
     def server(self):
-        srvr = self.project.client.servers.find(
-                name=self.project.qualify(self['name']))
+        srvr = self.project.client.servers.get(self.id)
         return srvr
 
     @property
