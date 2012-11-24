@@ -14,14 +14,13 @@ class CommandAnsibleHosts (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
-        systems = []
+        systems = {api.config['project_name']: []}
         for i in api.instances():
-            systems.append('%s' % (i.ip))
+            systems[api.config['project_name']].append('%s' % (i.ip))
+            systems[i['name']] = [i.ip]
 
         if opts.host:
             print json.dumps({})
         else:
-            print json.dumps({
-                    api.config['project_name']: systems
-                    }, indent=True)
+            print json.dumps(systems, indent=True)
 
