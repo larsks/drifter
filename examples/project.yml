@@ -1,6 +1,13 @@
+# The project.yml has project-specific settings.
 project:
+  # The project name and your username are used to qualify object names in the
+  # cloud.  For example, this example will create instanecs named
+  # "<username>.cluster.master", "<username>.cluster.node-0", etc.
   project_name: cluster
 
+  # The security groups section allows drifter create and destroy security
+  # groups along with your instances.  The value of `to port` defaults to the
+  # value of `from from`, and the value of `from port` defaults to `-1`.
   security groups:
     default:
       - protocol: tcp
@@ -16,6 +23,8 @@ project:
         to port: 9000
 
   instances:
+    # The `default` instance sets default values that will be used unless
+    # they are explicitly overridden in an instance definition.
     default:
       image: ubuntu-precise-x86_64
       flavor: m1.small
@@ -26,6 +35,10 @@ project:
       security_groups:
         - default
         - web
+
+    # This file is processed using the Jinja2 template engine, so
+    # any Jinja2 syntax is available.  For example, this defines
+    # three "node" instances named `node-0`, `node-1`, and `node-2`.
     {% for node in range(0,3) %}
     node-{{node}}:
     {% endfor %}
