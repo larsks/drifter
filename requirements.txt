@@ -1,0 +1,5 @@
+beaker
+jinja2
+PyYAML
+python-novaclient
+
