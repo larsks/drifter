@@ -87,6 +87,7 @@ class Instance (dict):
     @property
     def id(self):
         def get_id():
+            self.log.debug('getting id from remote api')
             srvr = self.project.client.servers.find(
                     name=self.project.qualify(self['name']))
             return srvr.id
@@ -116,6 +117,7 @@ class Instance (dict):
     @property
     def ip(self):
         def get_ip():
+            self.log.debug('getting ip from remote api')
             for fip in  self.project.client.floating_ips.list():
                 if fip.instance_id == self.server.id:
                     return fip.ip
