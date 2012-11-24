@@ -34,7 +34,6 @@ Synopsis
 Available commands
 ==================
 
-    {ansible_hosts,api,down,hosts,provision,sgdown,sgup,status,up}
       ansible_hosts       Generate output suitable for use as an Ansible
                           inventory.
       api                 Start an interactive Python shell with access to the
