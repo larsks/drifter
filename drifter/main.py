@@ -7,6 +7,7 @@ import logging
 
 from drifter import Drifter
 
+from   commands.command_api             import   CommandApi
 from   commands.command_up              import   CommandUp
 from   commands.command_down            import   CommandDown
 from   commands.command_status          import   CommandStatus
@@ -26,6 +27,7 @@ def parse_args(args):
 
     subparsers = p.add_subparsers(title='Available commands')
 
+    CommandApi(subparsers)
     CommandUp(subparsers)
     CommandDown(subparsers)
     CommandHosts(subparsers)
