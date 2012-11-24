@@ -1,0 +1,7 @@
+drifter:
+  os_username: lars
+  os_tenant_name: user/lars
+  os_auth_url: http://cloud.example.com:35357/v2.0/
+  os_password: SECRET
+  key_name: id_rsa
+
