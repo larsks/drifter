@@ -3,7 +3,7 @@
 import os
 import sys
 
-from command import Command
+from ..command import Command
 
 class CommandDown (Command):
     def build_subparser(self):
