@@ -6,6 +6,12 @@ import json
 
 from ..command import Command
 
+def gen_ansible_hosts(api, out):
+        for i in api.instances():
+            print >>out, '%s ansible_ssh_host=%s' % (
+                    i['name'], i.ip
+                    )
+
 class CommandAnsibleHosts (Command):
     def build_subparser(self):
         p = self.parser.add_parser('ansible_hosts')
@@ -14,13 +20,5 @@ class CommandAnsibleHosts (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
-        systems = {api.config['project_name']: []}
-        for i in api.instances():
-            systems[api.config['project_name']].append('%s' % (i.ip))
-            systems[i['name']] = [i.ip]
-
-        if opts.host:
-            print json.dumps({})
-        else:
-            print json.dumps(systems, indent=True)
+        gen_ansible_hosts(api, sys.stdout)
 

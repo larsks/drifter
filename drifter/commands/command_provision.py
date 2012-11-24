@@ -27,10 +27,8 @@ class CommandProvision (Command):
             self.log.error('your project does not have a playbook')
             sys.exit(1)
 
-        ansible_hosts = find_binary('drifter-ansible-hosts')
-        if not ansible_hosts:
-            self.log.error('drifter-ansible-hosts not found in $PATH')
-            sys.exit(1)
+        with open('.ansible_hosts', 'w') as fd:
+            command_ansible_hosts.gen_ansible_hosts(api, fd)
 
         playbook_args = []
         if opts.verbose:
@@ -47,7 +45,7 @@ class CommandProvision (Command):
         subprocess.call(
                 [
                     'ansible-playbook',
-                    '-i', ansible_hosts
+                    '-i', '.ansible_hosts',
                     ]
                 + playbook_args
                 + ['playbook.yml']
