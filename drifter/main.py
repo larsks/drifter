@@ -7,14 +7,15 @@ import logging
 
 from drifter import Drifter
 
-from   commands.command_api             import   CommandApi
-from   commands.command_up              import   CommandUp
-from   commands.command_down            import   CommandDown
-from   commands.command_status          import   CommandStatus
-from   commands.command_sgup            import   CommandSgup
-from   commands.command_sgdown          import   CommandSgdown
-from   commands.command_hosts           import   CommandHosts
 from   commands.command_ansible_hosts   import   CommandAnsibleHosts
+from   commands.command_api             import   CommandApi
+from   commands.command_down            import   CommandDown
+from   commands.command_hosts           import   CommandHosts
+from   commands.command_provision       import   CommandProvision
+from   commands.command_sgdown          import   CommandSgdown
+from   commands.command_sgup            import   CommandSgup
+from   commands.command_status          import   CommandStatus
+from   commands.command_up              import   CommandUp
 
 def parse_args(args):
     p = argparse.ArgumentParser()
@@ -27,14 +28,15 @@ def parse_args(args):
 
     subparsers = p.add_subparsers(title='Available commands')
 
+    CommandAnsibleHosts(subparsers)
     CommandApi(subparsers)
-    CommandUp(subparsers)
     CommandDown(subparsers)
     CommandHosts(subparsers)
-    CommandAnsibleHosts(subparsers)
-    CommandStatus(subparsers)
-    CommandSgup(subparsers)
+    CommandProvision(subparsers)
     CommandSgdown(subparsers)
+    CommandSgup(subparsers)
+    CommandStatus(subparsers)
+    CommandUp(subparsers)
 
     return p.parse_args(args)
 
