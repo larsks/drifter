@@ -28,6 +28,7 @@ class CommandProvision (Command):
             sys.exit(1)
 
         with open('.ansible_hosts', 'w') as fd:
+            self.log.debug('writing ansible hosts to .ansible_hosts')
             command_ansible_hosts.gen_ansible_hosts(api, fd)
 
         playbook_args = []
@@ -42,6 +43,7 @@ class CommandProvision (Command):
             playbook_args.append('-e')
             playbook_args.append(opts.extra_vars)
 
+        self.log.info('calling ansible-playbook')
         subprocess.call(
                 [
                     'ansible-playbook',
