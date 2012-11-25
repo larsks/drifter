@@ -36,6 +36,8 @@ class Instance (dict):
     @ratelimit
     @synchronized('net_lock')
     def assign_ip(self):
+        '''Find an available floating ip and assign it to
+        the instance.'''
         # Wait until a fixed address is available.
         self.log.info('waiting for a fixed ip address')
         while not self.server.networks:
@@ -57,6 +59,7 @@ class Instance (dict):
 
     @ratelimit
     def create(self):
+        '''Boot the instance.'''
         self.log.info('creating')
         self.cache.clear()
 
@@ -84,6 +87,7 @@ class Instance (dict):
                )
 
     def delete(self):
+        '''Delete the instance.'''
         self.log.info('deleting')
         self.cache.clear()
 
@@ -94,6 +98,7 @@ class Instance (dict):
 
     @property
     def id(self):
+        '''Return the server UUID.'''
         def get_id():
             self.log.debug('getting id from remote api')
             srvr = self.project.client.servers.find(
@@ -104,11 +109,14 @@ class Instance (dict):
 
     @property
     def server(self):
+        '''Return the Nova API server object for this instance.'''
         srvr = self.project.client.servers.get(self.id)
         return srvr
 
     @property
     def status(self):
+        '''Return the status of this instance.  'down' if not booted, 
+        otherwise whatever the Nova status() method returns.'''
         try:
             return self.server.status.lower()
         except novaclient.exceptions.NotFound:
@@ -116,14 +124,17 @@ class Instance (dict):
 
     @property
     def is_down(self):
+        '''Returns True if this instance is down, False otherwise.'''
         return self.status == 'down'
 
     @property
     def is_up(self):
+        '''Returns True if this instance is active, False otherwise.'''
         return self.status == 'active'
 
     @property
     def ip(self):
+        '''Returns the (a) floating ip assigned to this instance.'''
         def get_ip():
             self.log.debug('getting ip from remote api')
             for fip in  self.project.client.floating_ips.list():

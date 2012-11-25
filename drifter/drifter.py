@@ -47,6 +47,8 @@ class Drifter (object):
         self.create_client()
 
     def setup_locks(self):
+        '''Create locks used for synchronizing parallel
+        execution (e.g. when creating instances).'''
         self.net_lock = Lock()
 
     def setup_logging(self):

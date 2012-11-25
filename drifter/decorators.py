@@ -11,7 +11,7 @@ from functools import wraps
 import novaclient.exceptions
 
 class ratelimit (object):
-    '''Handles retring Nova API calls that fail due to API rate limits.'''
+    '''Handles retrying Nova API calls that fail due to API rate limits.'''
 
     def __init__(self, f):
         self.f = f
@@ -38,6 +38,8 @@ class ratelimit (object):
                 time.sleep(wait)
 
 class synchronized (object):
+    '''Synchronize calls against a named Lock (that is an attribute of 
+    owning object).'''
     def __init__ (self, lockname):
         self.lockname = lockname
         self.log = logging.getLogger('drifter.lock.%s' % lockname)
