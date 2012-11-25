@@ -47,12 +47,8 @@ class synchronized (object):
         def _(other,*args, **kwargs):
             lock = other.__getattribute__(self.lockname)
             self.log.debug('waiting for lock')
-            lock.acquire()
-            self.log.debug('acquired lock')
-            try:
+            with lock:
+                self.log.debug('acquired lock')
                 return f(other, *args, **kwargs)
-            finally:
-                self.log.debug('releasing lock')
-                lock.release()
         return _
 
