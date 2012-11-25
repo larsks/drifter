@@ -7,12 +7,15 @@ import time
 
 import novaclient.exceptions
 
+from decorators import *
+
 class Instance (dict):
     def __init__ (self, project, name, cfg, parent):
         super(Instance, self).__init__(cfg)
         self['name'] = name
         self.parent = parent
         self.project = project
+        self.net_lock = project.net_lock
         self.log = logging.getLogger('drifter.instance.%s' % self['name'])
         
         self.cache = self.project.cachemgr.get_cache(
@@ -30,6 +33,8 @@ class Instance (dict):
     def __repr__(self):
         return str(self)
 
+    @ratelimit
+    @synchronized('net_lock')
     def assign_ip(self):
         # Wait until a fixed address is available.
         self.log.info('waiting for a fixed ip address')
@@ -50,6 +55,7 @@ class Instance (dict):
 
         self.server.add_floating_ip(ip.ip)
 
+    @ratelimit
     def create(self):
         self.log.info('creating')
         self.cache.clear()

@@ -5,7 +5,8 @@ import sys
 import pprint
 import logging
 import time
-import multiprocessing
+from multiprocessing import Process, Lock
+from itertools import count
 
 import jinja2
 import yaml
@@ -42,7 +43,11 @@ class Drifter (object):
         self.load_user_config()
         self.load_project_config()
         self.setup_cache()
+        self.setup_locks()
         self.create_client()
+
+    def setup_locks(self):
+        self.net_lock = Lock()
 
     def setup_logging(self):
         '''Create a logger for this Drifter instance.'''
@@ -170,23 +175,23 @@ class Drifter (object):
 
     def create_instance(self, instance):
         '''Create an instance and assign an ip address.'''
+        
         self.create_client()
         instance.create()
         instance.assign_ip()
 
-    # XXX: It should be possible to create instances in parallel.
     def create_instances(self):
         '''Create all instances defined in the configuration.'''
         defaults = self.config['instances'].get('default', {})
 
         tasks = []
         for instance in self.instances():
-            t = multiprocessing.Process(
+            t = Process(
                     target=self.create_instance,
-                    args=(instance,))
+                    args=(instance,),
+                    name='create-%(name)s' % instance)
             t.start()
             tasks.append(t)
-
 
         self.log.debug('waiting for tasks')
         while tasks:
