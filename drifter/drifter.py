@@ -38,9 +38,9 @@ class Drifter (object):
                 else DEFAULT_PROJECT_CONFIG
 
         self.setup_logging()
-        self.setup_cache()
         self.load_user_config()
         self.load_project_config()
+        self.setup_cache()
         self.create_client()
 
     def setup_logging(self):
@@ -50,6 +50,8 @@ class Drifter (object):
     def setup_cache(self):
         '''Set up a beaker cache manager.'''
         self.cachemgr = CacheManager(**parse_cache_config_options(cache_opts))
+        self.image_cache = self.cachemgr.get_cache('images', expires=1800)
+        self.flavor_cache = self.cachemgr.get_cache('flavors', expires=1800)
 
     def qualify(self, name):
         '''Return <os_username>.<project_name>.<name> given <name>.'''
@@ -175,8 +177,7 @@ class Drifter (object):
         defaults = self.config['instances'].get('default', {})
 
         for instance in self.instances():
-            if instance.is_down:
-                self.create_instance(instance)
+            self.create_instance(instance)
 
     def delete_instance(self, instance):
         '''Delete a single instance.'''
@@ -188,6 +189,20 @@ class Drifter (object):
 
         for instance in self.instances():
             self.delete_instance(instance)
+
+    def find_image(self, image):
+        def _find_image():
+            return self.client.images.find(name=image).id
+        id = self.image_cache.get(key=image, createfunc=_find_image)
+        self.log.debug('got id=%s for image=%s', id, image)
+        return self.client.images.get(id)
+
+    def find_flavor(self, flavor):
+        def _find_flavor():
+            return self.client.flavors.find(name=flavor).id
+        id = self.flavor_cache.get(key=flavor, createfunc=_find_flavor)
+        self.log.debug('got id=%s for flavor=%s', id, flavor)
+        return self.client.flavors.get(id)
 
     def all_up(self):
         '''Return True if all instances are active.'''

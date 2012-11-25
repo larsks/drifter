@@ -54,8 +54,8 @@ class Instance (dict):
         self.log.info('creating')
         self.cache.clear()
 
-        image = self.project.client.images.find(name=self['image'])
-        flavor = self.project.client.flavors.find(name=self['flavor'])
+        image = self.project.find_image(self['image'])
+        flavor = self.project.find_flavor(self['flavor'])
         security_groups = [self.project.qualify(x) for x in
                 self['security_groups']]
 
