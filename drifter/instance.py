@@ -55,7 +55,9 @@ class Instance (dict):
         self.cache.clear()
 
         image = self.project.find_image(self['image'])
+        self.log.debug('got image')
         flavor = self.project.find_flavor(self['flavor'])
+        self.log.debug('got flavor')
         security_groups = [self.project.qualify(x) for x in
                 self['security_groups']]
 

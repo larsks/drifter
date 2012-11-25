@@ -5,6 +5,7 @@ import sys
 import pprint
 import logging
 import time
+import multiprocessing
 
 import jinja2
 import yaml
@@ -169,15 +170,29 @@ class Drifter (object):
 
     def create_instance(self, instance):
         '''Create an instance and assign an ip address.'''
+        self.create_client()
         instance.create()
         instance.assign_ip()
 
+    # XXX: It should be possible to create instances in parallel.
     def create_instances(self):
         '''Create all instances defined in the configuration.'''
         defaults = self.config['instances'].get('default', {})
 
+        tasks = []
         for instance in self.instances():
-            self.create_instance(instance)
+            t = multiprocessing.Process(
+                    target=self.create_instance,
+                    args=(instance,))
+            t.start()
+            tasks.append(t)
+
+
+        self.log.debug('waiting for tasks')
+        while tasks:
+            tasks[0].join()
+            t = tasks.pop(0)
+            self.log.debug('task %s completed', t)
 
     def delete_instance(self, instance):
         '''Delete a single instance.'''
