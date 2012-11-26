@@ -179,6 +179,15 @@ class Drifter (object):
         for name, rules in self.config['security groups'].items():
             self.delete_security_group(name)
 
+    def find_instance(self, name):
+        '''Return the Instance object for a named instance.  Raises
+        KeyError if no matching instance can be found.'''
+        for i in self.instances():
+            if i['name'] == name:
+                return i
+
+        raise KeyError(name)
+
     def create_instance(self, instance):
         '''Create an instance and assign an ip address.'''
         
