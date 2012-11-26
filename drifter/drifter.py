@@ -17,6 +17,7 @@ import novaclient.v1_1.client
 
 from instance import Instance
 from secgroups import Rule
+from decorators import *
 
 DEFAULT_USER_CONFIG = os.path.join(os.environ['HOME'], '.drifter.yml')
 DEFAULT_PROJECT_CONFIG = 'project.yml'
@@ -118,6 +119,7 @@ class Drifter (object):
 
         self.config.update(self.load_config(self.project_config_file)['project'])
 
+    @ratelimit
     def create_security_group(self, name):
         '''Given <name>, either create and return a new security group
         named <name> or return the existing security group with the same
@@ -133,15 +135,8 @@ class Drifter (object):
 
         return group
 
-    def create_security_group_rules(self, group, rules):
-        '''Provision security group <group> with rules from <rules>'''
-
-        self.log.info('adding rules to security group %s', group.name)
-        for rule in rules:
-            self.log.debug('adding rule (pre) %s', rule)
-            rule = Rule(rule)
-            self.log.debug('adding rule (post) %s', rule)
-
+    @ratelimit
+    def create_security_group_rule(self, group, rule):
             try:
                 sr = self.client.security_group_rules.create(
                         group.id,
@@ -151,6 +146,15 @@ class Drifter (object):
             except novaclient.exceptions.BadRequest:
                 # This probably means that the rule already exists.
                 pass
+
+    def create_security_group_rules(self, group, rules):
+        '''Provision security group <group> with rules from <rules>'''
+
+        self.log.info('adding rules to security group %s', group.name)
+        for rule in rules:
+            rule = Rule(rule)
+            create_security_group_rule(self, group, rule)
+
 
     def create_security_groups(self):
         '''Create and provision all security groups defined in the
