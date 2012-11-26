@@ -27,6 +27,12 @@ class Instance (dict):
         except KeyError:
             return self.parent[k]
 
+    def __contains__ (self, k):
+        return any([
+                super(Instance, self).__contains__(k),
+                self.parent.__contains__(k),
+                ])
+
     def __str__(self):
         return '<Instance %(name)s f:%(flavor)s i:%(image)s>' % self
 
@@ -72,7 +78,9 @@ class Instance (dict):
                 self['security groups']]
 
         if 'userdata' in self:
+            self.log.debug('reading userdata from %s', self['userdata'])
             userdata = open(self['userdata']).read()
+            self.log.debug('read %d bytes', len(userdata))
         else:
             userdata = None
 
