@@ -13,7 +13,9 @@ class CommandIp (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
-        for instance in api.instances():
-            if instance['name'] == opts.name:
-                print instance.ip
+        try:
+            instance = api.find_instance(opts.name)
+            print instance.ip
+        except KeyError:
+            pass
 
