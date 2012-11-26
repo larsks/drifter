@@ -104,7 +104,9 @@ class Instance (dict):
             self.log.debug('getting id from remote api')
             srvr = self.project.client.servers.find(
                     name=self.project.qualify(self['name']))
-            return srvr.id
+            id = srvr.id
+            self.log.debug('got id=%s', id)
+            return id
 
         return self.cache.get(key='id', createfunc=get_id)
 
