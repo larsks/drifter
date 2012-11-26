@@ -4,11 +4,6 @@ import os
 import sys
 import code
 
-try:
-    import readline
-except ImportError:
-    pass
-
 from ..command import Command
 
 banner = '''
@@ -29,6 +24,11 @@ class CommandApi (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
+        try:
+            import readline
+        except ImportError:
+            pass
+
         c = code.InteractiveConsole({
             '__name__': '__drifter__',
             'api': api,
