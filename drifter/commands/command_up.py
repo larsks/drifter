@@ -15,8 +15,14 @@ class CommandUp (Command):
     def handler(self, api, opts):
         print 'Creating all security groups.'
         api.create_security_groups()
-        print 'Creating all instances.'
-        api.create_instances()
-        print 'Waiting for instances to become active.'
-        api.wait_for_up()
+
+        if opts.server:
+            i = api.find_instance(opts.server)
+            print 'Creating instance %(name)s' % i
+            api.create_instance(i)
+        else:
+            print 'Creating all instances.'
+            api.create_instances()
+            print 'Waiting for instances to become active.'
+            api.wait_for_up()
 

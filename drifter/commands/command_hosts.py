@@ -12,7 +12,7 @@ class CommandHosts (Command):
         p.set_defaults(handler=self.run)
 
     def handler(self, api, opts):
-        if not api.all_up() and not opts.force:
+        if not opts.force and not api.all_up():
             self.log.error('some instances are not up (use --force to ' \
                     'continue anyay)')
             sys.exit(1)

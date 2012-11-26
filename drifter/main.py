@@ -16,6 +16,7 @@ from   commands.command_sgdown          import   CommandSgdown
 from   commands.command_sgup            import   CommandSgup
 from   commands.command_status          import   CommandStatus
 from   commands.command_up              import   CommandUp
+from   commands.command_ip              import   CommandIp
 
 def parse_args(args):
     p = argparse.ArgumentParser()
@@ -32,6 +33,7 @@ def parse_args(args):
     CommandAnsibleHosts(subparsers)
     CommandApi(subparsers)
     CommandDown(subparsers)
+    CommandIp(subparsers)
     CommandHosts(subparsers)
     CommandProvision(subparsers)
     CommandSgdown(subparsers)

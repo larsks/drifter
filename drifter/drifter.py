@@ -5,6 +5,8 @@ import sys
 import pprint
 import logging
 import time
+from multiprocessing import Process, Lock
+from itertools import count
 
 import jinja2
 import yaml
@@ -15,6 +17,7 @@ import novaclient.v1_1.client
 
 from instance import Instance
 from secgroups import Rule
+from decorators import *
 
 DEFAULT_USER_CONFIG = os.path.join(os.environ['HOME'], '.drifter.yml')
 DEFAULT_PROJECT_CONFIG = 'project.yml'
@@ -41,7 +44,13 @@ class Drifter (object):
         self.load_user_config()
         self.load_project_config()
         self.setup_cache()
+        self.setup_locks()
         self.create_client()
+
+    def setup_locks(self):
+        '''Create locks used for synchronizing parallel
+        execution (e.g. when creating instances).'''
+        self.net_lock = Lock()
 
     def setup_logging(self):
         '''Create a logger for this Drifter instance.'''
@@ -54,11 +63,11 @@ class Drifter (object):
         self.flavor_cache = self.cachemgr.get_cache('flavors', expires=1800)
 
     def qualify(self, name):
-        '''Return <os_username>.<project_name>.<name> given <name>.'''
+        '''Return <name>.<project_name>.<os_username> given <name>.'''
         return '%s.%s.%s' % (
-                self.config['os_username'],
-                self.config['project_name'],
                 name,
+                self.config['project_name'],
+                self.config['os_username'],
                 )
 
     def instances(self):
@@ -110,6 +119,7 @@ class Drifter (object):
 
         self.config.update(self.load_config(self.project_config_file)['project'])
 
+    @ratelimit
     def create_security_group(self, name):
         '''Given <name>, either create and return a new security group
         named <name> or return the existing security group with the same
@@ -125,15 +135,8 @@ class Drifter (object):
 
         return group
 
-    def create_security_group_rules(self, group, rules):
-        '''Provision security group <group> with rules from <rules>'''
-
-        self.log.info('adding rules to security group %s', group.name)
-        for rule in rules:
-            self.log.debug('adding rule (pre) %s', rule)
-            rule = Rule(rule)
-            self.log.debug('adding rule (post) %s', rule)
-
+    @ratelimit
+    def create_security_group_rule(self, group, rule):
             try:
                 sr = self.client.security_group_rules.create(
                         group.id,
@@ -143,6 +146,15 @@ class Drifter (object):
             except novaclient.exceptions.BadRequest:
                 # This probably means that the rule already exists.
                 pass
+
+    def create_security_group_rules(self, group, rules):
+        '''Provision security group <group> with rules from <rules>'''
+
+        self.log.info('adding rules to security group %s', group.name)
+        for rule in rules:
+            rule = Rule(rule)
+            self.create_security_group_rule(group, rule)
+
 
     def create_security_groups(self):
         '''Create and provision all security groups defined in the
@@ -167,8 +179,26 @@ class Drifter (object):
         for name, rules in self.config['security groups'].items():
             self.delete_security_group(name)
 
+    def find_instance(self, name):
+        '''Return the Instance object for a named instance.  Raises
+        KeyError if no matching instance can be found.'''
+        for i in self.instances():
+            if i['name'] == name:
+                return i
+
+        raise KeyError(name)
+
     def create_instance(self, instance):
         '''Create an instance and assign an ip address.'''
+        
+        self.create_client()
+
+        # Don't try to create instances that
+        # have already booted.
+        if instance.status != 'down':
+            self.log.warn('ignore create request -- this instance is not down')
+            return
+
         instance.create()
         instance.assign_ip()
 
@@ -176,8 +206,20 @@ class Drifter (object):
         '''Create all instances defined in the configuration.'''
         defaults = self.config['instances'].get('default', {})
 
+        tasks = []
         for instance in self.instances():
-            self.create_instance(instance)
+            t = Process(
+                    target=self.create_instance,
+                    args=(instance,),
+                    name='create-%(name)s' % instance)
+            t.start()
+            tasks.append(t)
+
+        self.log.debug('waiting for tasks')
+        while tasks:
+            tasks[0].join()
+            t = tasks.pop(0)
+            self.log.debug('task %s completed', t)
 
     def delete_instance(self, instance):
         '''Delete a single instance.'''
