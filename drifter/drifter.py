@@ -63,11 +63,11 @@ class Drifter (object):
         self.flavor_cache = self.cachemgr.get_cache('flavors', expires=1800)
 
     def qualify(self, name):
-        '''Return <os_username>.<project_name>.<name> given <name>.'''
+        '''Return <name>.<project_name>.<os_username> given <name>.'''
         return '%s.%s.%s' % (
-                self.config['os_username'],
-                self.config['project_name'],
                 name,
+                self.config['project_name'],
+                self.config['os_username'],
                 )
 
     def instances(self):
