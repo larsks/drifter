@@ -69,7 +69,7 @@ class Instance (dict):
         flavor = self.project.find_flavor(self['flavor'])
         self.log.debug('got flavor')
         security_groups = [self.project.qualify(x) for x in
-                self['security_groups']]
+                self['security groups']]
 
         if 'userdata' in self:
             userdata = open(self['userdata']).read()
