@@ -178,6 +178,12 @@ class Drifter (object):
     def create_instance(self, instance):
         '''Create an instance and assign an ip address.'''
         
+        # Don't try to create instances that
+        # have already booted.
+        if instance.status != 'down':
+            self.log.warn('ignore create request -- this instance is not down')
+            return
+
         self.create_client()
         instance.create()
         instance.assign_ip()

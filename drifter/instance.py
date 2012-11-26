@@ -60,6 +60,7 @@ class Instance (dict):
     @ratelimit
     def create(self):
         '''Boot the instance.'''
+
         self.log.info('creating')
         self.cache.clear()
 
