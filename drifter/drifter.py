@@ -153,7 +153,7 @@ class Drifter (object):
         self.log.info('adding rules to security group %s', group.name)
         for rule in rules:
             rule = Rule(rule)
-            create_security_group_rule(self, group, rule)
+            self.create_security_group_rule(self, group, rule)
 
 
     def create_security_groups(self):
