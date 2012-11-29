@@ -5,6 +5,8 @@ import sys
 import logging
 import time
 
+import jinja2
+
 import novaclient.exceptions
 
 from decorators import *
@@ -77,13 +79,6 @@ class Instance (dict):
         security_groups = [self.project.qualify(x) for x in
                 self['security groups']]
 
-        if 'userdata' in self:
-            self.log.debug('reading userdata from %s', self['userdata'])
-            userdata = open(self['userdata']).read()
-            self.log.debug('read %d bytes', len(userdata))
-        else:
-            userdata = None
-
         key_name = self.project.config.get('key_name')
 
         self.project.client.servers.create(
@@ -91,7 +86,7 @@ class Instance (dict):
                image,
                flavor,
                security_groups=security_groups,
-               userdata=userdata,
+               userdata=self.userdata,
                key_name=key_name,
                )
 
@@ -153,4 +148,17 @@ class Instance (dict):
                     return fip.ip
 
         return self.cache.get(key='ip', createfunc=get_ip)
+
+    @property
+    def userdata(self):
+        if 'userdata' in self:
+            self.log.debug('reading userdata from %s', self['userdata'])
+            tmpl = jinja2.Template(open(self['userdata']).read())
+            data = tmpl.render(
+                    project=self.project,
+                    instance=self,
+                    )
+            return data
+        else:
+            return None
 
